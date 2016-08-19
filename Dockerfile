@@ -1,23 +1,13 @@
-FROM rails:4.2.6
+FROM ruby:2.3.1-alpine
 
-RUN mkdir /opt/actioncenter
 WORKDIR /opt/actioncenter
 
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends \
-    libpq-dev \
-    libqt4-dev \
-    libqtwebkit-dev \
-    xvfb \
-    xauth && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists/* \
-    /tmp/* \
-    /var/tmp/*
+RUN apk add --update --no-cache libpq qt5-qtbase-dev qt5-qtwebkit-dev xvfb xauth git build-base postgresql-dev linux-headers libxml2-dev libxslt-dev
 
 ADD Gemfile* ./
 
-RUN bundle install
+RUN bundle config build.nokogiri --use-system-libraries
+RUN PATH="$PATH:/usr/lib/qt5/bin/" bundle install --jobs=4
 
 ADD bin/ ./bin
 ADD config/ ./config
